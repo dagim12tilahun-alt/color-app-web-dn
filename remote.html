@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Color Remote Control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f0f0f0; }
+        input { padding: 15px; font-size: 18px; width: 80%; max-width: 300px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #ccc; text-transform: uppercase; }
+        button { padding: 15px 30px; font-size: 18px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 10px; width: 85%; max-width: 320px; }
+        button:active { background: #0056b3; }
+        /* Style for the paste button */
+        .paste-btn { background: #28a745; }
+        .paste-btn:active { background: #1e7e34; }
+    </style>
+</head>
+<body>
+    <h2>Send Color Sequence</h2>
+    <input type="text" id="colorInput" placeholder="Enter letters (e.g. ABC)">
+    
+    <button class="paste-btn" onclick="pasteAndSend()">Paste & Send</button>
+    
+    <button onclick="sendColors()">Send to Screen</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://jiqhmctghoogytwdsjkr.supabase.co'; 
+        const SUPABASE_KEY = 'sb_publishable_hEIvBg6VqU_SvvTbdlFBSQ_6hNKF9KS';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // New function to handle pasting and immediate sending
+        async function pasteAndSend() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                    document.getElementById('colorInput').value = text;
+                    sendColors(); // Automatically call your existing send function
+                }
+            } catch (err) {
+                alert('Failed to read clipboard. Please ensure you have given paste permissions.');
+            }
+        }
+
+        async function sendColors() {
+            const input = document.getElementById('colorInput');
+            const text = input.value.toUpperCase();
+            
+            if (text) {
+                const { error } = await supabaseClient
+                    .from('messages')
+                    .insert([{ content: text }]);
+
+                if (error) {
+                    alert('Error: ' + error.message);
+                } else {
+                    input.value = ''; 
+                }
+            }
+        }
+    </script>
+</body>
+</html>
